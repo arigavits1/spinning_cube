@@ -4,6 +4,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 
 #include <iostream>
 
@@ -19,6 +22,9 @@ float deltaTime = 0.0f;
 float lastX, lastY;
 float yaw = -90.0f, pitch = 0.0f;
 bool firstMouse = true;
+bool uiMode = true;
+bool draw = true;
+float textureMergeAmount = 0.2f;
 
 void processInput(GLFWwindow* window);
 void framebuffer_size_callback(GLFWwindow* window, int WIDTH, int HEIGHT);
@@ -50,7 +56,7 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "OpenGL", monitor, nullptr);
+	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "OpenGL", glfwGetPrimaryMonitor(), nullptr);
 
 	if (window == NULL)
 	{
@@ -61,7 +67,6 @@ int main()
 
 	glfwMakeContextCurrent(window);
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSwapInterval(1);
 	
@@ -73,6 +78,14 @@ int main()
 	}
 
 	glEnable(GL_DEPTH_TEST);
+
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	io.MouseDrawCursor = false;
+	ImGui::StyleColorsDark();
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init("#version 330");
 
 	Shader shader("resources/object.shader");
 
@@ -205,6 +218,9 @@ int main()
 	glUniform1i(glGetUniformLocation(shader.program, "texture1"), 0);
 	glUniform1i(glGetUniformLocation(shader.program, "texture2"), 1);
 
+	glm::vec3 scale = glm::vec3(1.0f);
+	glm::vec3 color = glm::vec3(1.0f);
+	float scaleAmount = 1.0f;
 	while (!glfwWindowShouldClose(window))
 	{
 		currentTime = (float)glfwGetTime();
@@ -219,9 +235,13 @@ int main()
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, texture2);
 
+		glUniform3f(glGetUniformLocation(shader.program, "color"), color.x, color.y, color.z);
+		glUniform1f(glGetUniformLocation(shader.program, "textureMergeAmountUniform"), textureMergeAmount);
+
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(0.0f, -0.3f, 0.0f));
 		model = glm::rotate(model, glm::radians((float)glfwGetTime() * 100.0f + 45.0f * deltaTime), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, scale);
 		int modelLoc = glGetUniformLocation(shader.program, "model");
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
@@ -235,24 +255,61 @@ int main()
 		int projectionLoc = glGetUniformLocation(shader.program, "projection");
 		glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-		processInput(window);
-
 		shader.use();
 
-		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr);
+		if (draw)
+			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr);
+
+		ImGui_ImplGlfw_NewFrame();
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui::NewFrame();
+
+		ImGui::SetNextWindowSize(ImVec2(200, 200));
+		ImGui::Begin("Properties Window");
+		if (ImGui::Button("Close window"))
+		{
+			glfwSetWindowShouldClose(window, true);
+		}
+		ImGui::Checkbox("Draw sqaure", &draw);
+		ImGui::SliderFloat("Scale", &scaleAmount, -2.0f, 2.0f);
+		ImGui::SliderFloat("Texture Merge", &textureMergeAmount, 0.0f, 1.0f);
+		ImGui::ColorEdit3("Color", glm::value_ptr(color));
+		scale.x = scaleAmount;
+		scale.y = scaleAmount;
+		scale.z = scaleAmount;
+		ImGui::End();
+
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+		(uiMode ? glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL) : glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED));
+		processInput(window);
 
 		glfwPollEvents();
 		glfwSwapBuffers(window);
 	}
 
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
 	glfwTerminate();
 	return 0;
 }
 
+bool isEscapeReleased = true;
 void processInput(GLFWwindow* window)
 {
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-		glfwSetWindowShouldClose(window, true);
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_RELEASE)
+	{
+		isEscapeReleased = true;
+	}
+
+	if (isEscapeReleased && glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+	{
+		isEscapeReleased = false;
+
+		uiMode = !uiMode;
+		firstMouse = true;
+	}
 
 	float cameraSpeed = 2.5f * deltaTime;
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
@@ -271,35 +328,38 @@ void processInput(GLFWwindow* window)
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
-	if (firstMouse)
+	if (!uiMode)
 	{
+		if (firstMouse)
+		{
+			lastX = xpos;
+			lastY = ypos;
+			firstMouse = false;
+		}
+
+		float xoffset = xpos - lastX;
+		float yoffset = lastY - ypos;
 		lastX = xpos;
 		lastY = ypos;
-		firstMouse = false;
+
+		const float sensitivity = 0.1f;
+		xoffset *= sensitivity;
+		yoffset *= sensitivity;
+
+		yaw += xoffset;
+		pitch += yoffset;
+
+		if (pitch > 89.0f)
+			pitch = 89.0f;
+		if (pitch < -89.0f)
+			pitch = -89.0f;
+
+		glm::vec3 direction;
+		direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+		direction.y = sin(glm::radians(pitch));
+		direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+		cameraFront = glm::normalize(direction);
 	}
-
-	float xoffset = xpos - lastX;
-	float yoffset = lastY - ypos;
-	lastX = xpos;
-	lastY = ypos;
-
-	const float sensitivity = 0.1f;
-	xoffset *= sensitivity;
-	yoffset *= sensitivity;
-
-	yaw += xoffset;
-	pitch += yoffset;
-
-	if (pitch > 89.0f)
-		pitch = 89.0f;
-	if (pitch < -89.0f)
-		pitch = -89.0f;
-
-	glm::vec3 direction;
-	direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-	direction.y = sin(glm::radians(pitch));
-	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-	cameraFront = glm::normalize(direction);
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int WIDTH, int HEIGTH)
