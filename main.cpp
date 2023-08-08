@@ -4,9 +4,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_glfw.h>
+#include <imgui/imgui_impl_opengl3.h>
 
 #include <iostream>
 
@@ -24,6 +24,7 @@ float yaw = -90.0f, pitch = 0.0f;
 bool firstMouse = true;
 bool uiMode = true;
 bool draw = true;
+bool polygonMode = false;
 float textureMergeAmount = 0.2f;
 
 void processInput(GLFWwindow* window);
@@ -49,8 +50,8 @@ int main()
 	WIDTH = videoMode->width;
 	HEIGHT = videoMode->height;
 
-	lastX = WIDTH / 2;
-	lastY = HEIGHT / 2;
+	lastX = (float)WIDTH / 2;
+	lastY = (float)HEIGHT / 2;
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -69,7 +70,7 @@ int main()
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSwapInterval(1);
-	
+
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
 		std::cerr << "Failed to initialize GLAD" << std::endl;
@@ -271,6 +272,7 @@ int main()
 			glfwSetWindowShouldClose(window, true);
 		}
 		ImGui::Checkbox("Draw sqaure", &draw);
+		ImGui::Checkbox("Polygon Mode", &polygonMode);
 		ImGui::SliderFloat("Scale", &scaleAmount, -2.0f, 2.0f);
 		ImGui::SliderFloat("Texture Merge", &textureMergeAmount, 0.0f, 1.0f);
 		ImGui::ColorEdit3("Color", glm::value_ptr(color));
@@ -283,6 +285,7 @@ int main()
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 		(uiMode ? glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL) : glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED));
+		glPolygonMode(GL_FRONT_AND_BACK, (polygonMode ? GL_LINE : GL_FILL));
 		processInput(window);
 
 		glfwPollEvents();
