@@ -2,7 +2,7 @@ GLAD_SRC := glad.cpp
 
 CXX := g++
 CXXFLAGS := -std=c++11 -I/usr/include/imgui -I/usr/include/imgui/backends -g -Wall -Wformat
-LDFLAGS := -lglfw -lGL -lX11 -lpthread -lXrandr -lXi -ldl && ./main
+LDFLAGS := -lglfw -lGL -lX11 -lpthread -lXrandr -ldl && ./main
 
 all: main
 
