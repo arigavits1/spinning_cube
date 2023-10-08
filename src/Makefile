@@ -1,4 +1,4 @@
-GLAD_SRC := glad.cpp
+GLAD_SRC := glad.c
 
 CXX := g++
 CXXFLAGS := -std=c++11 -I/usr/include/imgui -I/usr/include/imgui/backends -g -Wall -Wformat
