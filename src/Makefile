@@ -6,11 +6,14 @@ LDFLAGS := -lglfw -lGL -lX11 -lpthread -lXrandr -ldl && ./main
 
 all: main
 
-main: main.o objects/imgui.o objects/imgui_demo.o objects/imgui_draw.o objects/imgui_tables.o objects/imgui_widgets.o objects/imgui_impl_glfw.o objects/imgui_impl_opengl3.o $(GLAD_SRC)
-	$(CXX) -o main objects/main.o objects/imgui.o objects/imgui_demo.o objects/imgui_draw.o objects/imgui_tables.o objects/imgui_widgets.o objects/imgui_impl_glfw.o objects/imgui_impl_opengl3.o $(GLAD_SRC) $(CXXFLAGS) $(LDFLAGS)
+main: objects/main.o objects/shaders.o objects/imgui.o objects/imgui_demo.o objects/imgui_draw.o objects/imgui_tables.o objects/imgui_widgets.o objects/imgui_impl_glfw.o objects/imgui_impl_opengl3.o $(GLAD_SRC)
+	$(CXX) -o main objects/main.o objects/shaders.o objects/imgui.o objects/imgui_demo.o objects/imgui_draw.o objects/imgui_tables.o objects/imgui_widgets.o objects/imgui_impl_glfw.o objects/imgui_impl_opengl3.o $(GLAD_SRC) $(CXXFLAGS) $(LDFLAGS)
 
 main.o: main.cpp
 	$(CXX) $(CXXFLAGS) -c -o objects/main.o main.cpp
+
+shaders.o: shaders.cpp
+	$(CXX) $(CXXFLAGS) -c -o objects/shaders.o shaders.cpp
 
 imgui.o: /usr/include/imgui/imgui.cpp
 	$(CXX) $(CXXFLAGS) -c -o objects/imgui.o /usr/include/imgui/imgui.cpp

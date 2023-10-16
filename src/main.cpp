@@ -10,7 +10,7 @@
 
 #include <iostream>
 
-#include "shaders.h"
+#include "include/shaders.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
@@ -57,7 +57,7 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "OpenGL", glfwGetPrimaryMonitor(), nullptr);
+	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "OpenGL", nullptr, nullptr);
 
 	if (window == NULL)
 	{
@@ -265,7 +265,8 @@ int main()
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui::NewFrame();
 
-		ImGui::SetNextWindowSize(ImVec2(200, 200));
+		ImGui::SetNextWindowSize(ImVec2(200, WIDTH));
+		ImGui::SetNextWindowPos(ImVec2(0, 0));
 		ImGui::Begin("Properties Window");
 		if (ImGui::Button("Close window"))
 		{
