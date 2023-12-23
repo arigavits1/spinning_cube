@@ -11,6 +11,7 @@
 #include <iostream>
 
 #include "include/shaders.h"
+#include "include/VAO.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
@@ -191,26 +192,21 @@ int main()
 	{
 		std::cout << "Failed to load texture" << std::endl;
 	}
-	stbi_image_free(data);
-
-	unsigned int VAO;
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
+	stbi_image_free(data);	
 
 	unsigned int VBO;
 	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+	VAO cubeVAO;
+	cubeVAO.CreateAttribArray(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (const void*)0);
+	cubeVAO.CreateAttribArray(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (const void*)(3 * sizeof(float)));
+
 	unsigned int EBO;
 	glGenBuffers(1, &EBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (const void*)0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (const void*)(3 * sizeof(float)));
 
 	float prevTime = 0.0f;
 	float currentTime = 0.0f;
