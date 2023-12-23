@@ -12,6 +12,7 @@
 
 #include "include/shaders.h"
 #include "include/VAO.h"
+#include "include/VBO.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
@@ -192,12 +193,9 @@ int main()
 	{
 		std::cout << "Failed to load texture" << std::endl;
 	}
-	stbi_image_free(data);	
+	stbi_image_free(data);
 
-	unsigned int VBO;
-	glGenBuffers(1, &VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	VBO cubeVBO(GL_ARRAY_BUFFER, sizeof(vertices), vertices);
 
 	VAO cubeVAO;
 	cubeVAO.CreateAttribArray(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (const void*)0);
