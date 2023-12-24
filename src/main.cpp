@@ -13,18 +13,13 @@
 #include "include/shaders.h"
 #include "include/VAO.h"
 #include "include/VBO.h"
+#include "include/WindowData.h"
+#include "include/window.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
-
 unsigned int WIDTH = 1920;
 unsigned int HEIGHT = 1080;
 
-float deltaTime = 0.0f;
-
-float lastX, lastY;
-float yaw = -90.0f, pitch = 0.0f;
-bool firstMouse = true;
-bool uiMode = true;
 bool draw = true;
 bool polygonMode = false;
 float textureMergeAmount = 0.2f;
@@ -33,46 +28,10 @@ void processInput(GLFWwindow* window);
 void framebuffer_size_callback(GLFWwindow* window, int WIDTH, int HEIGHT);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 5.0f);
-glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
-
 int main()
 {
-	if (!glfwInit())
-	{
-		std::cerr << "Failed to initialize GLFW" << std::endl;
-		glfwTerminate();
-		return -1;
-	}
-
-	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-	const GLFWvidmode* videoMode = glfwGetVideoMode(monitor);
-
-	WIDTH = videoMode->width;
-	HEIGHT = videoMode->height;
-
-	lastX = (float)WIDTH / 2;
-	lastY = (float)HEIGHT / 2;
-
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Game Engine v1.1", nullptr, nullptr);
-
-	if (window == NULL)
-	{
-		std::cerr << "Failed to create window" << std::endl;
-		glfwTerminate();
-		return -1;
-	}
-
-	glfwMakeContextCurrent(window);
-	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-	glfwSetCursorPosCallback(window, mouse_callback);
-	glfwSwapInterval(1);
-
+	WinData windowData;
+	Window window(WIDTH, HEIGHT, "Game Engine v1.2", false);
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
 		std::cerr << "Failed to initialize GLAD" << std::endl;
@@ -87,7 +46,7 @@ int main()
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 	io.MouseDrawCursor = false;
 	ImGui::StyleColorsDark();
-	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplGlfw_InitForOpenGL(window.GetWindow(), true);
 	ImGui_ImplOpenGL3_Init("#version 330");
 
 	Shader shader("../resources/object.shader");
@@ -216,10 +175,12 @@ int main()
 	glm::vec3 scale = glm::vec3(1.0f);
 	glm::vec3 color = glm::vec3(1.0f);
 	float scaleAmount = 1.0f;
-	while (!glfwWindowShouldClose(window))
+	while (!glfwWindowShouldClose(window.GetWindow()))
 	{
+		
+		glfwSetWindowUserPointer(window.GetWindow(), &windowData);
 		currentTime = (float)glfwGetTime();
-		deltaTime = currentTime - prevTime;
+		windowData.deltaTime = currentTime - prevTime;
 		prevTime = currentTime;
 
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -235,13 +196,13 @@ int main()
 
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(0.0f, -0.3f, 0.0f));
-		model = glm::rotate(model, glm::radians((float)glfwGetTime() * 100.0f + 45.0f * deltaTime), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, glm::radians((float)glfwGetTime() * 100.0f + 45.0f * windowData.deltaTime), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, scale);
 		int modelLoc = glGetUniformLocation(shader.program, "model");
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
 		glm::mat4 view = glm::mat4(1.0f);
-		view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+		view = glm::lookAt(windowData.cameraPos, windowData.cameraPos + windowData.cameraFront, windowData.cameraUp);
 		int viewLoc = glGetUniformLocation(shader.program, "view");
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 
@@ -264,7 +225,7 @@ int main()
 		ImGui::Begin("Properties Window");
 		if (ImGui::Button("Close window"))
 		{
-			glfwSetWindowShouldClose(window, true);
+			glfwSetWindowShouldClose(window.GetWindow(), true);
 		}
 		ImGui::Checkbox("Draw sqaure", &draw);
 		ImGui::Checkbox("Polygon Mode", &polygonMode);
@@ -279,88 +240,16 @@ int main()
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-		(uiMode ? glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL) : glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED));
+		(windowData.uiMode ? glfwSetInputMode(window.GetWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL) : glfwSetInputMode(window.GetWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED));
 		glPolygonMode(GL_FRONT_AND_BACK, (polygonMode ? GL_LINE : GL_FILL));
-		processInput(window);
+		processInput(window.GetWindow());
 
 		glfwPollEvents();
-		glfwSwapBuffers(window);
+		glfwSwapBuffers(window.GetWindow());
 	}
 
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	glfwTerminate();
 	return 0;
-}
-
-bool isEscapeReleased = true;
-void processInput(GLFWwindow* window)
-{
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_RELEASE)
-	{
-		isEscapeReleased = true;
-	}
-
-	if (isEscapeReleased && glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-	{
-		isEscapeReleased = false;
-
-		uiMode = !uiMode;
-		firstMouse = true;
-	}
-
-	float cameraSpeed = 2.5f * deltaTime;
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		cameraPos += cameraSpeed * cameraFront;
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		cameraPos -= cameraSpeed * cameraFront;
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		cameraPos -= cameraSpeed * glm::normalize(glm::cross(cameraFront, cameraUp));
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		cameraPos += cameraSpeed * glm::normalize(glm::cross(cameraFront, cameraUp));
-	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-		cameraPos -= cameraSpeed * cameraUp;
-	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-		cameraPos += cameraSpeed * cameraUp;
-}
-
-void mouse_callback(GLFWwindow* window, double xpos, double ypos)
-{
-	if (!uiMode)
-	{
-		if (firstMouse)
-		{
-			lastX = xpos;
-			lastY = ypos;
-			firstMouse = false;
-		}
-
-		float xoffset = xpos - lastX;
-		float yoffset = lastY - ypos;
-		lastX = xpos;
-		lastY = ypos;
-
-		const float sensitivity = 0.1f;
-		xoffset *= sensitivity;
-		yoffset *= sensitivity;
-
-		yaw += xoffset;
-		pitch += yoffset;
-
-		if (pitch > 89.0f)
-			pitch = 89.0f;
-		if (pitch < -89.0f)
-			pitch = -89.0f;
-
-		glm::vec3 direction;
-		direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-		direction.y = sin(glm::radians(pitch));
-		direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-		cameraFront = glm::normalize(direction);
-	}
-}
-
-void framebuffer_size_callback(GLFWwindow* window, int WIDTH, int HEIGTH)
-{
-	glViewport(0, 0, WIDTH, HEIGHT);
 }

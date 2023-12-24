@@ -6,8 +6,8 @@ LDFLAGS := -lglfw -lGL -lX11 -lpthread -lXrandr -ldl && ./main
 
 all: main
 
-main: main.o shaders.o vao.o vbo.o imgui_obj/imgui.o imgui_obj/imgui_demo.o imgui_obj/imgui_draw.o imgui_obj/imgui_tables.o imgui_obj/imgui_widgets.o imgui_obj/imgui_impl_glfw.o imgui_obj/imgui_impl_opengl3.o $(GLAD_SRC)
-	$(CXX) -o main objects/main.o objects/shaders.o objects/vao.o objects/vbo.o imgui_obj/imgui.o imgui_obj/imgui_demo.o imgui_obj/imgui_draw.o imgui_obj/imgui_tables.o imgui_obj/imgui_widgets.o imgui_obj/imgui_impl_glfw.o imgui_obj/imgui_impl_opengl3.o $(GLAD_SRC) $(CXXFLAGS) $(LDFLAGS)
+main: main.o shaders.o vao.o vbo.o window.o imgui_obj/imgui.o imgui_obj/imgui_demo.o imgui_obj/imgui_draw.o imgui_obj/imgui_tables.o imgui_obj/imgui_widgets.o imgui_obj/imgui_impl_glfw.o imgui_obj/imgui_impl_opengl3.o $(GLAD_SRC)
+	$(CXX) -o main objects/main.o objects/shaders.o objects/vao.o objects/vbo.o objects/window.o imgui_obj/imgui.o imgui_obj/imgui_demo.o imgui_obj/imgui_draw.o imgui_obj/imgui_tables.o imgui_obj/imgui_widgets.o imgui_obj/imgui_impl_glfw.o imgui_obj/imgui_impl_opengl3.o $(GLAD_SRC) $(CXXFLAGS) $(LDFLAGS)
 
 main.o: main.cpp
 	$(CXX) $(CXXFLAGS) -c -o objects/main.o main.cpp
@@ -20,6 +20,9 @@ vao.o: VAO.cpp
 
 vbo.o: VBO.cpp
 	$(CXX) $(CXXFLAGS) -c -o objects/vbo.o VBO.cpp
+
+window.o: window.cpp
+	$(CXX) $(CXXFLAGS) -c -o objects/window.o window.cpp
 
 clean:
 	rm -f main objects/*.o
