@@ -13,6 +13,7 @@
 #include "include/shaders.h"
 #include "include/VAO.h"
 #include "include/VBO.h"
+#include "include/EBO.h"
 #include "include/WindowData.h"
 #include "include/window.h"
 #define STB_IMAGE_IMPLEMENTATION
@@ -160,10 +161,7 @@ int main()
 	cubeVAO.CreateAttribArray(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (const void*)0);
 	cubeVAO.CreateAttribArray(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (const void*)(3 * sizeof(float)));
 
-	unsigned int EBO;
-	glGenBuffers(1, &EBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+	EBO cubeEBO(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	float prevTime = 0.0f;
 	float currentTime = 0.0f;
