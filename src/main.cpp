@@ -16,6 +16,7 @@
 #include "include/EBO.h"
 #include "include/WindowData.h"
 #include "include/window.h"
+#include "include/texture.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 unsigned int WIDTH = 1920;
@@ -97,63 +98,22 @@ int main()
 	};
 
 	unsigned int indices[] = {
-	0, 1, 2,   // Front face
-	3, 4, 5,   // Back face
-	6, 7, 8,   // Left face
-	9, 10, 11, // Right face
-	12, 13, 14,   // Top face
-	15, 16, 17,   // Bottom face
-	18, 19, 20,   // Front face
-	21, 22, 23,   // Back face
-	24, 25, 26,   // Left face
-	27, 28, 29, // Right face
-	30, 31, 32,   // Top face
-	33, 34, 35   // Bottom face
+		0, 1, 2,   // Front face
+		3, 4, 5,   // Back face
+		6, 7, 8,   // Left face
+		9, 10, 11, // Right face
+		12, 13, 14,   // Top face
+		15, 16, 17,   // Bottom face
+		18, 19, 20,   // Front face
+		21, 22, 23,   // Back face
+		24, 25, 26,   // Left face
+		27, 28, 29, // Right face
+		30, 31, 32,   // Top face
+		33, 34, 35   // Bottom face
 	};
 
-	unsigned int texture1;
-	glGenTextures(1, &texture1);
-	glBindTexture(GL_TEXTURE_2D, texture1);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	int width, height, nrChannels;
-	unsigned char* data = stbi_load("../resources/textures/container.jpg", &width, &height, &nrChannels, 0);
-	if (data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "Failed to load texture" << std::endl;
-	}
-	stbi_image_free(data);
-
-	unsigned int texture2;
-	glGenTextures(1, &texture2);
-	glBindTexture(GL_TEXTURE_2D, texture2);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-	stbi_set_flip_vertically_on_load(true);
-	data = stbi_load("../resources/textures/awesomeface.png", &width, &height, &nrChannels, 0);
-	if (data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "Failed to load texture" << std::endl;
-	}
-	stbi_image_free(data);
+	Texture texture1(GL_REPEAT, GL_REPEAT, GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR, GL_RGB, GL_RGB, "../resources/textures/container.jpg", false, GL_TEXTURE0);
+	Texture texture2(GL_REPEAT, GL_REPEAT, GL_NEAREST, GL_NEAREST, GL_RGBA, GL_RGBA, "../resources/textures/awesomeface.png", true, GL_TEXTURE1);
 
 	VBO cubeVBO(GL_ARRAY_BUFFER, sizeof(vertices), vertices);
 
@@ -167,8 +127,8 @@ int main()
 	float currentTime = 0.0f;
 
 	shader.use();
-	glUniform1i(glGetUniformLocation(shader.program, "texture1"), 0);
-	glUniform1i(glGetUniformLocation(shader.program, "texture2"), 1);
+	glUniform1i(glGetUniformLocation(shader.program, "texture1"), 1);
+	glUniform1i(glGetUniformLocation(shader.program, "texture2"), 0);
 
 	glm::vec3 scale = glm::vec3(1.0f);
 	glm::vec3 color = glm::vec3(1.0f);
@@ -184,10 +144,8 @@ int main()
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture1);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, texture2);
+		texture1.activate();
+		texture2.activate();
 
 		glUniform3f(glGetUniformLocation(shader.program, "color"), color.x, color.y, color.z);
 		glUniform1f(glGetUniformLocation(shader.program, "textureMergeAmountUniform"), textureMergeAmount);
