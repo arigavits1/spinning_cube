@@ -64,9 +64,9 @@ void processInput(GLFWwindow* window)
 	}
 	float cameraSpeed = 2.5f * windowData->deltaTime;
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		windowData->cameraPos += cameraSpeed * windowData->cameraFront;
+		windowData->cameraPos -= cameraSpeed * glm::normalize(glm::cross(glm::normalize(glm::cross(windowData->cameraFront, windowData->cameraUp)), glm::vec3(0.0f, 1.0f, 0.0f)));
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		windowData->cameraPos -= cameraSpeed * windowData->cameraFront;
+		windowData->cameraPos += cameraSpeed * glm::normalize(glm::cross(glm::normalize(glm::cross(windowData->cameraFront, windowData->cameraUp)), glm::vec3(0.0f, 1.0f, 0.0f)));
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 		windowData->cameraPos -= cameraSpeed * glm::normalize(glm::cross(windowData->cameraFront, windowData->cameraUp));
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
