@@ -17,3 +17,8 @@ unsigned int EBO::GetEbo()
 {
     return EBOid;
 }
+
+bool EBO::operator!=(const std::nullptr_t& other)
+{
+    return true;
+}
