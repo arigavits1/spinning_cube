@@ -13,7 +13,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 class Window
 {
 public:
-    Window(unsigned int WIDTH, unsigned int HEIGHT, const char* title, bool fullScreen);
+    Window(unsigned int WIDTH, unsigned int HEIGHT, const char* title);
     GLFWwindow* GetWindow();
 
 private:

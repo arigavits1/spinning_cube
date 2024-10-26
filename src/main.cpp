@@ -32,7 +32,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 int main()
 {
 	WinData windowData;
-	Window window(WIDTH, HEIGHT, "Game Engine v1.3", false);
+	Window window(WIDTH, HEIGHT, "Game Engine v1.3");
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
 		std::cerr << "Failed to initialize GLAD" << std::endl;

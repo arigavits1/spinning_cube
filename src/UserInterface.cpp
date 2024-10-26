@@ -4,7 +4,7 @@ bool draw = true;
 bool polygonMode = false;
 float textureMergeAmount = 0.2f;
 float scaleAmount = 1.0f;
-glm::vec3 color = glm::vec3(1.0f);
+glm::vec3 colorValues = glm::vec3(1.0f);
 
 UserInterface::UserInterface(GLFWwindow* p_window, unsigned int p_WinWidth, unsigned int p_WinHeight) : window(p_window), WinWidth(p_WinHeight), WinHeight(p_WinHeight)
 {
@@ -37,7 +37,7 @@ void UserInterface::Update()
 	ImGui::Checkbox("Polygon Mode", &polygonMode);
 	ImGui::SliderFloat("Scale", &scaleAmount, -2.0f, 2.0f);
 	ImGui::SliderFloat("Texture Merge", &textureMergeAmount, 0.0f, 1.0f);
-	ImGui::ColorEdit3("Color", glm::value_ptr(color));
+	ImGui::ColorEdit3("Color", glm::value_ptr(colorValues));
 	ImGui::End();
 }
 

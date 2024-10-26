@@ -1,6 +1,6 @@
 #include "include/window.h"
 
-Window::Window(unsigned int WIDTH, unsigned int HEIGHT, const char* title, bool fullScreen)
+Window::Window(unsigned int WIDTH, unsigned int HEIGHT, const char* title)
 {
     if (!glfwInit())
 	{
@@ -24,7 +24,7 @@ Window::Window(unsigned int WIDTH, unsigned int HEIGHT, const char* title, bool 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	window = glfwCreateWindow(WIDTH, HEIGHT, title, nullptr, nullptr);
+	window = glfwCreateWindow(WIDTH, HEIGHT, title, monitor, nullptr);
 
 	if (window == NULL)
 	{

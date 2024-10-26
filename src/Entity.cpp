@@ -1,4 +1,5 @@
 #include "include/Entity.h"
+#include "include/UserInterface.h"
 
 Entity::Entity(VAO p_vao, VBO p_vbo, EBO p_ebo, Shader p_shader, unsigned int p_WinWidth = 0, unsigned int p_WinHeight = 0, Texture* p_texture1 = NULL, Texture* p_texture2 = NULL) : vao(p_vao), vbo(p_vbo), ebo(p_ebo), texture1(*p_texture1), texture2(*p_texture2), shader(p_shader), WinWidth(p_WinWidth), WinHeight(p_WinHeight)
 {    
@@ -17,7 +18,7 @@ void Entity::update(WindowData windowData)
 {
     texture1.activate();
 	texture2.activate();
-
+	
 	glUniform3f(glGetUniformLocation(shader.program, "color"), color.x, color.y, color.z);
 	glUniform1f(glGetUniformLocation(shader.program, "textureMergeAmountUniform"), textureMergeAmount);
 
@@ -40,4 +41,8 @@ void Entity::update(WindowData windowData)
 	scale.x = scaleAmount;
 	scale.y = scaleAmount;
 	scale.z = scaleAmount;
+	
+	color.x = colorValues.x;
+	color.y = colorValues.y;
+	color.z = colorValues.z;
 }

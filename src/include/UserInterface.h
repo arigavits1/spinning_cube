@@ -11,7 +11,7 @@ extern bool draw;
 extern bool polygonMode;
 extern float textureMergeAmount;
 extern float scaleAmount;
-extern glm::vec3 color;
+extern glm::vec3 colorValues;
 
 class UserInterface
 {
